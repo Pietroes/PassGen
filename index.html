@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Generatore di Password</title>
+  <style>
+    /* Stili generali */
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to right, #6a11cb, #2575fc);
+      color: #fff;
+      transition: background-color 0.3s, color 0.3s;
+      margin: 0;
+      padding: 0;
+    }
+    /* Container principale */
+    .container {
+      max-width: 500px;
+      margin: 50px auto;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.2);
+      backdrop-filter: blur(10px);
+      text-align: center;
+    }
+    h1 {
+      margin-bottom: 20px;
+      text-transform: uppercase;
+      font-weight: bold;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    input[type="text"],
+    input[type="number"],
+    textarea {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+      text-align: center;
+    }
+    input[type="range"] {
+      width: 100%;
+    }
+    input[type="checkbox"] {
+      margin-right: 5px;
+    }
+    /* Box per simboli personalizzati centrato */
+    #customSymbols {
+      width: 80%;
+      margin: 0 auto;
+      display: block;
+    }
+    /* Pulsanti generali */
+    button {
+      padding: 12px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: 0.3s;
+      margin: 5px;
+    }
+    .btn-blue {
+      background-color: #007bff;
+      color: #fff;
+    }
+    .btn-blue:hover {
+      background-color: #0056b3;
+    }
+    .btn-orange {
+      background-color: #ff9800;
+      color: #fff;
+    }
+    .btn-orange:hover {
+      background-color: #e68900;
+    }
+    .btn-green {
+      background-color: #28a745;
+      color: #fff;
+    }
+    .btn-green:hover {
+      background-color: #218838;
+    }
+    /* Pulsante elimina specifico (rosso) */
+    .delete-btn {
+      background-color: #dc3545;
+      color: #fff;
+      padding: 10px 15px;
+      border-radius: 5px;
+      transition: 0.3s;
+    }
+    .delete-btn:hover {
+      background-color: #c82333;
+    }
+    /* Output password */
+    .output {
+      margin-top: 20px;
+      font-size: 1.2em;
+      padding: 12px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.3);
+      word-break: break-all;
+    }
+    /* Dropdown menu e bottoni fissi per menu e modalità */
+    .toggle-menu, .toggle-mode {
+      position: fixed;
+      top: 10px;
+      padding: 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      z-index: 1001;
+    }
+    .toggle-menu {
+      left: 10px;
+      background-color: #4caf50;
+      color: #fff;
+    }
+    .toggle-menu:hover {
+      background-color: #388e3c;
+    }
+    .toggle-mode {
+      right: 10px;
+      background-color: #ff5722;
+      color: #fff;
+    }
+    .toggle-mode:hover {
+      background-color: #d84315;
+    }
+    .dropdown-menu {
+      position: fixed;
+      top: 50px;
+      left: 10px;
+      background: rgba(0, 0, 0, 0.7);
+      border-radius: 8px;
+      overflow: hidden;
+      max-height: 0;
+      transition: max-height 0.5s ease-out;
+      z-index: 1000;
+    }
+    .dropdown-menu.open {
+      max-height: 300px;
+    }
+    .dropdown-menu ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .dropdown-menu li {
+      padding: 10px;
+      cursor: pointer;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+      text-align: center;
+    }
+    .dropdown-menu li:last-child {
+      border-bottom: none;
+    }
+    .dropdown-menu li:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+    /* Cronologia: forza i pulsanti a destra in una sola riga */
+    .history-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(255, 255, 255, 0.3);
+      padding: 8px;
+      margin-bottom: 8px;
+      border-radius: 5px;
+      word-break: break-all;
+    }
+    .history-actions {
+      display: flex;
+      gap: 5px;
+      white-space: nowrap;
+      justify-content: flex-end;
+    }
+    .delete-all-btn {
+      margin-top: 10px;
+      width: 100%;
+      background-color: #dc3545;
+      color: #fff;
+    }
+    .delete-all-btn:hover {
+      background-color: #c82333;
+    }
+    .copy-btn {
+      background-color: #28a745;
+      color: #fff;
+    }
+    .copy-btn:hover {
+      background-color: #218838;
+    }
+    /* Modalità Notte: colori scuri e vivaci */
+    body.night-mode {
+      background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+    }
+    body.night-mode .container {
+      background: rgba(0, 0, 0, 0.8);
+      color: #fff;
+      box-shadow: 0 0 15px rgba(0,0,0,0.5);
+    }
+    body.night-mode input[type="text"],
+    body.night-mode textarea {
+      background: #444;
+      color: #fff;
+      border: 1px solid #888;
+    }
+    body.night-mode .output {
+      background: rgba(0, 0, 0, 0.6);
+      border-color: #777;
+    }
+    /* Modal per la documentazione legale */
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+    }
+    .modal-content {
+      background: #fff;
+      color: #000;
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 90%;
+      max-height: 80%;
+      overflow-y: auto;
+      text-align: left;
+    }
+    .modal-buttons {
+      margin-top: 20px;
+      text-align: right;
+    }
+    .btn-red {
+      background-color: #dc3545;
+      color: #fff;
+      padding: 12px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-left: 10px;
+      transition: 0.3s;
+    }
+    .btn-red:hover {
+      background-color: #c82333;
+    }
+  </style>
+</head>
+<body>
+  <!-- Modal per la documentazione legale -->
+  <div id="modal" class="modal">
+    <div class="modal-content">
+      <h2>Documentazione Legale</h2>
+      <p><strong>Privacy Policy:</strong> Questa applicazione non raccoglie, elabora o trasmette dati personali. Non vengono memorizzate informazioni dell'utente.Verrà creato un file (<code>accepted.txt</code>) per memorizzare l'accettazione di questa informativa e non mostrare nuovamente il pop-up all'avvio dell'app.</p>
+      <p><strong>Termini e Condizioni d'Uso:</strong> L'app è fornita "così com'è" senza garanzie. L'utilizzo dell'app costituisce accettazione dei termini d'uso e lo sviluppatore non si assume responsabilità per eventuali danni derivanti dall'uso delle password generate.</p>
+      <p><strong>Disclaimer e Note Legali:</strong> L'app è uno strumento di generazione casuale di password. Nonostante l'algoritmo garantisca casualità, la sicurezza delle password non può essere garantita al 100%; l'uso dell'app è a rischio dell'utente.</p>
+      <p><strong>Documentazione Tecnica:</strong> L'app genera password selezionando casualmente caratteri da un insieme predefinito. Non vengono utilizzate tecnologie crittografiche avanzate.</p>
+      <p><strong>Conformità alle Linee Guida degli App Store:</strong> Lo sviluppatore si impegna a rispettare le linee guida di pubblicazione e le normative vigenti.</p>
+      <p><strong>Informazioni sull'Applicazione: </strong> Questa applicazione è stata realizzata da AIWorldCenter per hobby, utilizzando tecnologie di intelligenza artificiale. AIWorldCenter realizza diversi progetti, tra cui <em>AIMUSE - Music For All</em> (un canale YouTube).</p>
+      <strong>Licenza con cui è fornita quest'applicazione:</strong>Copyright (c) 2025 AiWorldCenter (hobbista) Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+      
+      The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+      
+      THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.<br><br>
+      <div class="modal-buttons">
+        <button id="acceptBtn" class="btn-green">Accetta</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Bottone per il menu a tendina -->
+  <button class="toggle-menu btn-green" onclick="toggleMenu()">Menu</button>
+  <div id="dropdownMenu" class="dropdown-menu">
+    <ul>
+      <li onclick="showPage('main')">Pagina Principale</li>
+      <li onclick="showPage('history')">Cronologia delle Password</li>
+      <li onclick="showPage('info')">Informazioni sull'Applicazione</li>
+    </ul>
+  </div>
+  
+  <!-- Bottone per cambiare modalità notte/giorno -->
+  <button class="toggle-mode btn-orange" onclick="toggleMode()">Notte / Giorno</button>
+  
+  <!-- Pagina Principale: Generatore di Password -->
+  <div class="container" id="pageMain">
+    <h1>Generatore di Password</h1>
+    
+    <!-- Slider per la lunghezza della password -->
+    <div class="form-group">
+      <label for="lengthRange">Lunghezza Password: <span id="lengthValue">12</span></label>
+      <input type="range" id="lengthRange" min="4" max="50" value="12" 
+             oninput="document.getElementById('lengthValue').textContent = this.value;">
+    </div>
+    
+    <!-- Checkboxes per le opzioni -->
+    <div class="form-group">
+      <input type="checkbox" id="includeNumbers" checked>
+      <label for="includeNumbers" style="display:inline;">Includi Numeri</label>
+    </div>
+    <div class="form-group">
+      <input type="checkbox" id="includeLowercase" checked>
+      <label for="includeLowercase" style="display:inline;">Lettere Minuscole</label>
+    </div>
+    <div class="form-group">
+      <input type="checkbox" id="includeUppercase" checked>
+      <label for="includeUppercase" style="display:inline;">Lettere Maiuscole</label>
+    </div>
+    <div class="form-group">
+      <input type="checkbox" id="includeSymbols" checked>
+      <label for="includeSymbols" style="display:inline;">Simboli</label>
+    </div>
+    
+    <!-- Campo per simboli personalizzati centrato -->
+    <div class="form-group">
+      <label for="customSymbols">Simboli Personalizzati:</label>
+      <input type="text" id="customSymbols" placeholder="Es: @#$%">
+    </div>
+    
+    <!-- Indicatore di forza e pulsante Genera Password in linea -->
+    <div class="form-group" style="text-align:center; display: flex; justify-content: center; align-items: center; gap: 10px;">
+      <label style="margin:0;">Livello di difficoltà: <span id="difficultyLevel" style="font-weight:bold;">N/A</span></label>
+      <button class="btn-blue" onclick="generatePassword()">Genera Password</button>
+    </div>
+    
+    <!-- Visualizzazione della password e tasto per copiare -->
+    <div class="form-group" style="text-align:center;">
+      <div class="output" id="passwordOutput">La tua password apparirà qui</div>
+      <button class="btn-green" onclick="copyPassword()">Copia</button>
+    </div>
+  </div>
+  
+  <!-- Pagina Cronologia delle Password -->
+  <div class="container" id="pageHistory" style="display:none;">
+    <h1>Cronologia delle Password</h1>
+    <p>Le password vengono eliminate ogni 5 minuti per motivi di sicurezza.</p>
+    <div id="historyList">
+      <!-- Le password generate verranno inserite qui -->
+    </div>
+    <button class="delete-all-btn" onclick="deleteAllPasswords()">Elimina Tutte le Password</button>
+  </div>
+  
+  <!-- Pagina Informazioni sull'Applicazione -->
+  <div class="container" id="pageInfo" style="display:none;">
+    <h1>Informazioni sull'Applicazione</h1>
+    <p>
+      <strong>Privacy Policy:</strong> Questa applicazione non raccoglie, elabora o trasmette dati personali. Non vengono memorizzate informazioni dell'utente.Verrà creato un file (<code>accepted.txt</code>) per memorizzare l'accettazione di questa informativa e non mostrare nuovamente il pop-up all'avvio dell'app.<br><br>
+      <strong>Termini e Condizioni d'Uso:</strong> L'app è fornita "così com'è" senza garanzie. L'utilizzo dell'app costituisce accettazione dei termini d'uso e lo sviluppatore non si assume responsabilità per eventuali danni derivanti dall'uso delle password generate.<br><br>
+      <strong>Disclaimer e Note Legali:</strong> L'app è uno strumento di generazione casuale di password. Nonostante l'algoritmo garantisca casualità, la sicurezza delle password non può essere garantita al 100%; l'uso dell'app è a rischio dell'utente.<br><br>
+      <strong>Documentazione Tecnica:</strong> L'app genera password selezionando casualmente caratteri da un insieme predefinito. Non vengono utilizzate tecnologie crittografiche avanzate.<br><br>
+      <strong>Conformità alle Linee Guida degli App Store:</strong> Lo sviluppatore si impegna a rispettare le linee guida di pubblicazione e le normative vigenti.<br><br>
+      <strong>Informazioni sull'Applicazione:</strong> Questa applicazione è stata realizzata da AIWorldCenter per hobby, utilizzando tecnologie di intelligenza artificiale. AIWorldCenter realizza diversi progetti, tra cui <em>AIMUSE - Music For All</em> (un canale YouTube).<br><br>
+      <strong>Licenza con cui è fornita quest'applicazione: </strong>Copyright (c) 2025 AiWorldCenter (hobbista) Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+      
+      The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+      
+      THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.<br><br>
+      Ti invitiamo, con gentilezza, a cercare AIMUSE - Music For All su YouTube per scoprire i suoi altri progetti.
+    </p>
+  </div>
+  
+  <script>
+    // Al caricamento della pagina, controlla se l'informativa è già stata accettata tramite localStorage
+    document.addEventListener("DOMContentLoaded", function() {
+      if(localStorage.getItem("accepted") === "true") {
+        document.getElementById("modal").style.display = "none";
+      } else {
+        document.getElementById("modal").style.display = "flex";
+      }
+    });
+    
+    // Gestione del pulsante Accetta nel modal
+    document.getElementById("acceptBtn").addEventListener("click", function(){
+      localStorage.setItem("accepted", "true");
+      document.getElementById("modal").style.display = "none";
+    });
+    
+    // Array per memorizzare la cronologia delle password generate
+    let passwordHistory = [];
+    
+    // Funzione per mostrare la pagina selezionata
+    function showPage(page) {
+      toggleMenu(true);
+      document.getElementById('pageMain').style.display = 'none';
+      document.getElementById('pageHistory').style.display = 'none';
+      document.getElementById('pageInfo').style.display = 'none';
+      
+      if(page === 'main') {
+        document.getElementById('pageMain').style.display = 'block';
+      } else if(page === 'history') {
+        document.getElementById('pageHistory').style.display = 'block';
+        updateHistoryDisplay();
+      } else if(page === 'info') {
+        document.getElementById('pageInfo').style.display = 'block';
+      }
+    }
+    
+    // Toggle modalità notte/giorno
+    function toggleMode() {
+      document.body.classList.toggle('night-mode');
+    }
+    
+    // Toggle menu a tendina
+    function toggleMenu(forceClose = false) {
+      const menu = document.getElementById('dropdownMenu');
+      if(forceClose) {
+        menu.classList.remove('open');
+      } else {
+        menu.classList.toggle('open');
+      }
+    }
+    
+    // Genera una nuova password e la aggiunge alla cronologia
+    function generatePassword() {
+      const length = parseInt(document.getElementById('lengthRange').value);
+      const includeNumbers = document.getElementById('includeNumbers').checked;
+      const includeLowercase = document.getElementById('includeLowercase').checked;
+      const includeUppercase = document.getElementById('includeUppercase').checked;
+      const includeSymbols = document.getElementById('includeSymbols').checked;
+      const customSymbols = document.getElementById('customSymbols').value;
+      
+      let charset = "";
+      if (includeNumbers) charset += "0123456789";
+      if (includeLowercase) charset += "abcdefghijklmnopqrstuvwxyz";
+      if (includeUppercase) charset += "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+      if (includeSymbols) charset += "!@#$%^&*()_+~`|}{[]:;?><,./-=";
+      if (customSymbols) charset += customSymbols;
+      
+      if (charset.length === 0) {
+        alert("Seleziona almeno una opzione per generare la password.");
+        return;
+      }
+      
+      let password = "";
+      for (let i = 0; i < length; i++) {
+        password += charset[Math.floor(Math.random() * charset.length)];
+      }
+      
+      document.getElementById('passwordOutput').textContent = password;
+      
+      // Calcola il livello di difficoltà e imposta il colore fisso
+      calculateDifficulty(includeNumbers, includeLowercase, includeUppercase, includeSymbols, length);
+      
+      // Aggiunge la nuova password alla cronologia
+      passwordHistory.push(password);
+    }
+    
+    // Calcola la difficoltà in base alle opzioni e alla lunghezza
+    function calculateDifficulty(numbers, lowercase, uppercase, symbols, length) {
+      let score = 0;
+      if (numbers) score++;
+      if (lowercase) score++;
+      if (uppercase) score++;
+      if (symbols) score++;
+      
+      // Se la password è sotto i 10 caratteri, è sempre considerata Debole
+      if (length < 10) {
+        score = 0;
+      } else if (length > 30) {
+        score += 3;
+      } else if (length > 15) {
+        score += 2;
+      }
+      
+      let difficulty = "";
+      let color = "";
+      if (score <= 2) {
+        difficulty = "Debole";
+        color = "red";
+      } else if (score <= 4) {
+        difficulty = "Media";
+        color = "yellow";
+      } else if (score <= 6) {
+        difficulty = "Forte";
+        color = "green";
+      } else {
+        difficulty = "Super Forte";
+        color = "purple";
+      }
+      
+      const diffElem = document.getElementById('difficultyLevel');
+      diffElem.textContent = difficulty;
+      diffElem.style.color = color;
+      
+      // Effetto neon per Super Forte
+      if (difficulty === "Super Forte") {
+        diffElem.style.textShadow = "0 0 10px purple, 0 0 20px purple, 0 0 30px purple, 0 0 40px purple";
+      } else {
+        diffElem.style.textShadow = "none";
+      }
+    }
+    
+    // Copia la password dalla pagina principale
+    function copyPassword() {
+      const passwordText = document.getElementById('passwordOutput').textContent;
+      navigator.clipboard.writeText(passwordText).then(function() {
+        alert("Password copiata negli appunti!");
+      }, function(err) {
+        alert("Errore nella copia della password: " + err);
+      });
+    }
+    
+    // Aggiorna la cronologia
+    function updateHistoryDisplay() {
+      const historyList = document.getElementById('historyList');
+      historyList.innerHTML = "";
+      passwordHistory.forEach((pwd, index) => {
+        const div = document.createElement('div');
+        div.className = 'history-item';
+        div.innerHTML = `<span>${pwd}</span>
+                          <div class="history-actions">
+                            <button class="copy-btn" onclick="copyHistoryPassword(${index})">Copia</button>
+                            <button class="delete-btn" onclick="deletePassword(${index})">Elimina</button>
+                          </div>`;
+        historyList.appendChild(div);
+      });
+    }
+    
+    // Copia una password dalla cronologia
+    function copyHistoryPassword(index) {
+      const pwd = passwordHistory[index];
+      navigator.clipboard.writeText(pwd).then(function() {
+        alert("Password copiata negli appunti!");
+      }, function(err) {
+        alert("Errore nella copia della password: " + err);
+      });
+    }
+    
+    // Elimina una password dalla cronologia
+    function deletePassword(index) {
+      passwordHistory.splice(index, 1);
+      updateHistoryDisplay();
+    }
+    
+    // Elimina tutte le password dalla cronologia
+    function deleteAllPasswords() {
+      passwordHistory = [];
+      updateHistoryDisplay();
+    }
+    
+    // Elimina automaticamente la cronologia ogni 5 minuti (300000 ms)
+    setInterval(() => {
+      passwordHistory = [];
+      if(document.getElementById('pageHistory').style.display === 'block'){
+        updateHistoryDisplay();
+      }
+    }, 300000);
+  </script>
+</body>
+</html>
